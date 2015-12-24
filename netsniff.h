@@ -24,9 +24,19 @@ struct program_options {
 	char	    bpf_expr[BPF_SZ];
 };
 
+#define ETH_ALEN 6  /* Octets in one ethernet addr   */
+#define ETH_HLEN 14 /* Total octets in header.       */
+
+/* Ether protocols (type) */
+#define ETH_P_IP        0x0800          /* Internet Protocol packet     */
+#define ETH_P_ARP       0x0806          /* Address Resolution packet    */
+#define ETH_P_DEC       0x6000          /* DEC Assigned proto           */
+#define ETH_P_RARP      0x8035          /* Reverse Addr Res packet      */
+#define ETH_P_IPV6      0x86DD          /* IPv6 over bluebook           */
+
 struct machdr {
-	uint8_t	 dst[6];
-	uint8_t	 src[6];
+	uint8_t	 dst[ETH_ALEN];
+	uint8_t	 src[ETH_ALEN];
 	uint16_t type;
 };
 #define mac_hdr(ptr) ((struct machdr *)(ptr))
