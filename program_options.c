@@ -1,16 +1,8 @@
 #include <getopt.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define BPF_SZ 80
-
-struct program_options {
-	const char *interface;
-	int	    snaplen;
-	int	    count;
-	char  bpf_expr[BPF_SZ];
-};
+#include "netsniff.h"
 
 /* Deal with non-option arguments here */
 static inline int
@@ -40,19 +32,15 @@ int
 get_program_options(int argc, char **argv, struct program_options *opts)
 {
 	int c;
-	struct program_options stopt;
-
-
 	const struct option long_options[] = {
-		{"interface", required_argument, 0,	'i'},
-		{"snaplen",   required_argument, 0,	's'},
-		{"count",     required_argument, 0,	'c'},
-		{"version",   no_argument,	 0,	'v'},
-		{"help",      no_argument,	 0,	'h'},
+		{"interface", required_argument,	    0,	'i'},
+		{"snaplen",   required_argument,	    0,	's'},
+		{"count",     required_argument, 	    0,	'c'},
+		{"promisc",   no_argument,     &opts->promisc,	 1 },
+		{"version",   no_argument,		    0,	'v'},
+		{"help",      no_argument,		    0,	'h'},
 		{ } /* terminating entry */
 	};
-
-	opts = &stopt;
 
 	while (1) {
 		int option_index = 0;
@@ -66,7 +54,6 @@ get_program_options(int argc, char **argv, struct program_options *opts)
 		switch (c) {
 		case 'i':
 			opts->interface = optarg;
-			printf("opt: %c: optarg: %s\n", c, optarg);
 			break;
 
 			/*
@@ -75,30 +62,19 @@ get_program_options(int argc, char **argv, struct program_options *opts)
 			 */
 		case 's':
 			opts->snaplen = atoi(optarg);
-			printf("opt: %c: optarg: %s\n", c, optarg);
 			break;
 
 		case 'c':
 			opts->count = atoi(optarg);
-			printf("opt: %c: optarg: %s\n", c, optarg);
-			break;
-
-		case 'v':
-			printf("opt: %c: optarg: %s\n", c, optarg);
-			break;
-
-		case 'h':
-			printf("opt: %c: optarg: %s\n", c, optarg);
 			break;
 
 		case '?':
 			/* getopt_long will have already printed an error */
-			printf("opt: %c: optarg: %s\n", c, optarg);
 			break;
 
+		case 0: break;
 		default:
 			/* Not sure how to get here... */
-			printf("opt: %c: optarg: %s\n", c, optarg);
 			return -1;
 		}
 	}
