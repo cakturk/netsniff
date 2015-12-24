@@ -55,12 +55,26 @@ pkt_handler(u_char *usr, const struct pcap_pkthdr *pkt, const u_char *d)
 {
 	char macsrc[6 * 3];
 	char macdst[6 * 3];
+	char ipsrc[INET_ADDRSTRLEN];
+	char ipdst[INET_ADDRSTRLEN];
 	struct machdr *mac = mac_hdr(d);
+	struct iphdr *ip;
 
-	fprintf(stdout, "len: %u, caplen: %u, type: %04x "
-		"%s->%s\n",
-		pkt->len, pkt->caplen, ntohs(mac->type),
-		mac_str(macdst, mac->dst), mac_str(macsrc, mac->src));
+	switch (ntohs(mac->type)) {
+	case ETH_P_IP:
+		ip = ip_hdr(d + ETH_HLEN);
+
+		fprintf(stdout, "len: %u, caplen: %u, type: %04x "
+			"%s->%s, IP: %s->%s, frag: %04x\n",
+			pkt->len, pkt->caplen, ntohs(mac->type),
+			mac_str(macdst, mac->dst), mac_str(macsrc, mac->src),
+			inet_ntop(AF_INET, &ip->saddr, ipsrc, INET_ADDRSTRLEN),
+			inet_ntop(AF_INET, &ip->daddr, ipdst, INET_ADDRSTRLEN),
+			ntohs(ip->frag_off));
+		break;
+	default:
+		fprintf(stdout, "ether type: 0x%04x\n", ntohs(mac->type));
+	}
 }
 
 static const char *mac_str(char *__restrict buf, uint8_t *__restrict addr)
