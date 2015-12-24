@@ -29,7 +29,7 @@ struct machdr {
 	uint8_t	 src[6];
 	uint16_t type;
 };
-#define mac_hdr(ptr) ((struct machdr *)ptr)
+#define mac_hdr(ptr) ((struct machdr *)(ptr))
 
 struct iphdr {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
@@ -51,7 +51,7 @@ struct iphdr {
 	uint32_t   saddr;
 	uint32_t   daddr;
 };
-#define ip_hdr(ptr) ((struct iphdr *)ptr)
+#define ip_hdr(ptr) ((struct iphdr *)(ptr))
 
 int get_program_options(int argc, char **argv, struct program_options *opts);
 
