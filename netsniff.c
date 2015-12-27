@@ -65,12 +65,12 @@ pkt_handler(u_char *usr, const struct pcap_pkthdr *pkt, const u_char *d)
 		ip = ip_hdr(d + ETH_HLEN);
 
 		fprintf(stdout, "len: %u, caplen: %u, type: %04x "
-			"%s->%s, IP: %s->%s, frag: %04x\n",
+			"%s->%s, IP: %s->%s, frag: %04x, ver: %x, ihl: %x\n",
 			pkt->len, pkt->caplen, ntohs(mac->type),
 			mac_str(macdst, mac->dst), mac_str(macsrc, mac->src),
 			inet_ntop(AF_INET, &ip->saddr, ipsrc, INET_ADDRSTRLEN),
 			inet_ntop(AF_INET, &ip->daddr, ipdst, INET_ADDRSTRLEN),
-			ntohs(ip->frag_off));
+			ntohs(ip->frag_off), ip->version, ip->ihl);
 		break;
 	default:
 		fprintf(stdout, "ether type: 0x%04x\n", ntohs(mac->type));
