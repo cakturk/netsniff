@@ -4,8 +4,15 @@
 #ifndef _NETSNIF_H_
 #define _NETSNIF_H_
 
+#if defined(__APPLE__)
+#define __BYTE_ORDER __BYTE_ORDER__
+#define __LITTLE_ENDIAN __ORDER_LITTLE_ENDIAN__
+#define __BIG_ENDIAN __ORDER_BIG_ENDIAN__
+#else
 /* Linux specific header. Fix this include for other UNIX systems */
 #include <endian.h>
+#endif
+
 #include <stdint.h>
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
