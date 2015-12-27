@@ -22,8 +22,9 @@ copy_non_option_args(int argc, char **argv, char *bpf_expr)
 		memcpy(p, m, sz);
 		p += sz;
 		*p++ = ' ';
+		room -= sz + 1;
 	}
-	p = '\0';
+	*p = '\0';
 
 	return 0;
 }
