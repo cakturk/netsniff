@@ -13,7 +13,9 @@
 #include <endian.h>
 #endif
 
+#include <arpa/inet.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #  define __LITTLE_ENDIAN_BITFIELD 1
@@ -48,6 +50,10 @@ struct machdr {
 };
 #define mac_hdr(ptr) ((struct machdr *)(ptr))
 
+#define IP_RE           0x8000          /* Flag: "Reserved"             */
+#define IP_DF           0x4000          /* Flag: "Don't Fragment"       */
+#define IP_MF           0x2000          /* Flag: "More Fragments"       */
+#define IP_OFFSET       0x1FFF          /* "Fragment Offset" part       */
 struct iphdr {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 	uint8_t	   ihl:4,
@@ -69,6 +75,17 @@ struct iphdr {
 	uint32_t   daddr;
 };
 #define ip_hdr(ptr) ((struct iphdr *)(ptr))
+
+/* returns true if MF bit is set */
+static inline int ip_mf(struct iphdr *iph)
+{
+	return !!(iph->frag_off & htons(IP_MF));
+}
+/* returns true if DF bit is set */
+static inline int ip_df(struct iphdr *iph)
+{
+	return !!(iph->frag_off & htons(IP_DF));
+}
 
 int get_program_options(int argc, char **argv, struct program_options *opts);
 
