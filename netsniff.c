@@ -14,7 +14,7 @@
 
 static void
 pkt_handler(u_char *, const struct pcap_pkthdr *, const u_char *);
-static const char *
+const char *
 mac_str(char *__restrict buf, uint8_t *__restrict addr);
 
 int main(int argc, char *argv[])
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 	exit(EXIT_SUCCESS);
 }
 
+int eth_print(const struct machdr *mh, struct strbuf *sb);
 static void
 pkt_handler(u_char *usr, const struct pcap_pkthdr *pkt, const u_char *d)
 {
@@ -76,12 +77,4 @@ pkt_handler(u_char *usr, const struct pcap_pkthdr *pkt, const u_char *d)
 	default:
 		fprintf(stdout, "ether type: 0x%04x\n", ntohs(mac->type));
 	}
-}
-
-static const char *mac_str(char *__restrict buf, uint8_t *__restrict addr)
-{
-	sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
-		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
-
-	return buf;
 }

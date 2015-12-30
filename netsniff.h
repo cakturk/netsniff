@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #  define __LITTLE_ENDIAN_BITFIELD 1
@@ -33,8 +34,38 @@ struct program_options {
 	char	    bpf_expr[BPF_SZ];
 };
 
-#define ETH_ALEN 6  /* Octets in one ethernet addr   */
-#define ETH_HLEN 14 /* Total octets in header.       */
+struct strbuf {
+	size_t  size;
+	size_t  len;
+	char   *buf;
+};
+#define sb_curr(sb) ((sb)->buf + (sb)->len)
+
+static inline size_t sb_room(struct strbuf *sb)
+{
+	return sb->size - sb->len;
+}
+static inline void sb_append_char(struct strbuf *sb, char c)
+{
+	*(sb->buf + sb->len++) = c;
+}
+static inline void sb_append_str(struct strbuf *sb, const char *s)
+{
+	size_t len = strlen(s);
+	memcpy(sb->buf + sb->len, s, len);
+	sb->len =+ len;
+	*sb_curr(sb) = '\0';
+	++sb->len;
+}
+static inline void sb_append_nullstr(struct strbuf *sb, const char *s)
+{
+	sb_append_str(sb, s);
+	sb->len =- 1;
+}
+
+#define ETH_ALEN 6        /* Octets in one ethernet addr   */
+#define ETH_HLEN 14       /* Total octets in header.       */
+#define ETH_ADDRSTRLEN 18 /* Total octets in header.       */
 
 /* Ether protocols (type) */
 #define ETH_P_IP        0x0800          /* Internet Protocol packet     */
@@ -54,6 +85,7 @@ struct machdr {
 #define IP_DF           0x4000          /* Flag: "Don't Fragment"       */
 #define IP_MF           0x2000          /* Flag: "More Fragments"       */
 #define IP_OFFSET       0x1FFF          /* "Fragment Offset" part       */
+
 struct iphdr {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 	uint8_t	   ihl:4,
