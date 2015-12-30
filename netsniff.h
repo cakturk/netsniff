@@ -49,18 +49,20 @@ static inline void sb_append_char(struct strbuf *sb, char c)
 {
 	*(sb->buf + sb->len++) = c;
 }
+static inline void sb_append_null(struct strbuf *sb)
+{
+	*(sb->buf + sb->len++) = '\0';
+}
 static inline void sb_append_str(struct strbuf *sb, const char *s)
 {
 	size_t len = strlen(s);
 	memcpy(sb->buf + sb->len, s, len);
-	sb->len =+ len;
-	*sb_curr(sb) = '\0';
-	++sb->len;
+	sb->len += len;
 }
 static inline void sb_append_nullstr(struct strbuf *sb, const char *s)
 {
 	sb_append_str(sb, s);
-	sb->len =- 1;
+	sb_append_null(sb);
 }
 
 #define ETH_ALEN 6        /* Octets in one ethernet addr   */
