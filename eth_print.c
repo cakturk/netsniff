@@ -44,6 +44,6 @@ int eth_print_type(uint16_t type, struct strbuf *sb)
 	if (sb_room(sb) < len)
 		return -ENOBUFS;
 
-	sb_append_nullstr(sb, typestr);
+	sb_append_str(sb, typestr);
 	return 0;
 }
