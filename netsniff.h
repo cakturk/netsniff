@@ -109,6 +109,19 @@ struct iphdr {
 	uint32_t   daddr;
 };
 #define ip_hdr(ptr) ((struct iphdr *)(ptr))
+static inline int ip_hdrlen(struct iphdr *iph)
+{
+	return iph->ihl * 4;
+}
+
+/* UDP data structure */
+struct udphdr {
+	uint16_t sport;
+	uint16_t dport;
+	uint16_t len;
+	uint16_t csum;
+};
+#define udp_hdr(ptr) ((struct udphdr *)(ptr))
 
 /* returns true if MF bit is set */
 static inline int ip_mf(struct iphdr *iph)

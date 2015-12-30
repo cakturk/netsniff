@@ -1,5 +1,5 @@
 CFLAGS = -g3 -O0 -Wall -pipe
-OBJECTS = program_options.o eth_print.o ip_print.o netsniff.o
+OBJECTS = program_options.o eth_print.o ip_print.o udp_print.o netsniff.o
 PROGRAM = netsniff
 LDLIBS = -lpcap
 
