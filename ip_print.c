@@ -44,7 +44,7 @@ int iphdr_print(struct iphdr *iph, struct strbuf *sb)
 	const char *s;
 	int len;
 	char ihl[16];
-	char flags[9];
+	char flags[10];
 
 	if (iph->version == 6) {
 		const char msg[] = "IPv6 headers are not supported yet";
@@ -57,7 +57,7 @@ int iphdr_print(struct iphdr *iph, struct strbuf *sb)
 	}
 
 	len = sprintf(ihl, "hdrlen: %d ", iph->ihl * 4);
-        len += sprintf(flags, "[DF%dMF%d]", ip_df(iph), ip_mf(iph));
+        len += sprintf(flags, "[DF%dMF%d] ", ip_df(iph), ip_mf(iph));
 
 	if (sb_room(sb) < (INET_ADDRSTRLEN * 2) + 3 + len)
 		return -ENOBUFS;
@@ -74,7 +74,6 @@ int iphdr_print(struct iphdr *iph, struct strbuf *sb)
 	if (!s)
 		return -errno;
 	sb->len += strlen(s);
-	sb_append_null(sb);
 
 	return 0;
 }

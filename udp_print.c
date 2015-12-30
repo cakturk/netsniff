@@ -12,7 +12,7 @@ udp_print(struct udphdr *uh, struct strbuf *sb)
 	if (sb_room(sb) < UDPSTR_MAX)
 		return -ENOBUFS;
 
-	sprintf(tmp, "UDP: %d->%d len: %d", ntohs(uh->sport),
+	sprintf(tmp, "%d->%d len: %d", ntohs(uh->sport),
 		ntohs(uh->dport), ntohs(uh->len));
 	sb_append_str(sb, tmp);
 

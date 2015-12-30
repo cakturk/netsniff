@@ -45,6 +45,10 @@ static inline size_t sb_room(struct strbuf *sb)
 {
 	return sb->size - sb->len;
 }
+static inline void sb_reset(struct strbuf *sb)
+{
+	sb->len = 0;
+}
 static inline void sb_append_char(struct strbuf *sb, char c)
 {
 	*(sb->buf + sb->len++) = c;
@@ -171,6 +175,13 @@ static inline int ip_df(struct iphdr *iph)
 	return !!(iph->frag_off & htons(IP_DF));
 }
 
-int get_program_options(int argc, char **argv, struct program_options *opts);
+extern int get_program_options(int argc, char **argv,
+			       struct program_options *opts);
+extern const char *ethertype_to_str(uint16_t type);
+extern int eth_print(const struct machdr *mh, struct strbuf *sb);
+extern int tcp_print(struct tcphdr *th, struct strbuf *sb);
+extern int iphdr_print(struct iphdr *iph, struct strbuf *sb);
+extern int udp_print(struct udphdr *uh, struct strbuf *sb);
+extern const char *ipproto_str(int proto);
 
 #endif /* end of include guard: _NETSNIF_H_ */
