@@ -55,7 +55,7 @@ static inline void sb_append_char(struct strbuf *sb, char c)
 }
 static inline void sb_append_null(struct strbuf *sb)
 {
-	*(sb->buf + sb->len++) = '\0';
+	sb_append_char(sb, '\0');
 }
 static inline void sb_append_str(struct strbuf *sb, const char *s)
 {
