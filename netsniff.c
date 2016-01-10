@@ -7,6 +7,9 @@
 
 #define CAPTURE_INF -1
 
+/* MAC + IP + TCP hdr */
+#define MIN_SNAPLEN 54
+
 #define err_exit(msg) do {		\
 	fprintf(stderr, "%s", msg);	\
 	exit(EXIT_FAILURE);		\
@@ -29,6 +32,8 @@ int main(int argc, char *argv[])
 
 	if (!opts.interface)
 		opts.interface = "any";
+	if (opts.snaplen < MIN_SNAPLEN)
+		opts.snaplen = MIN_SNAPLEN;
 
 	pcap = pcap_open_live(opts.interface, opts.snaplen,
 			      opts.promisc, 2000, errbuff);
