@@ -23,6 +23,7 @@ mac_str(char *__restrict buf, uint8_t *__restrict addr);
 int main(int argc, char *argv[])
 {
 	static struct program_options opts;
+	struct bpf_program fp;
 	char errbuff[PCAP_ERRBUF_SIZE];
 	pcap_t *pcap;
 	int err;
@@ -39,6 +40,14 @@ int main(int argc, char *argv[])
 			      opts.promisc, 2000, errbuff);
 	if (!pcap)
 		err_exit("cannot open network interface\n");
+
+	err = pcap_compile(pcap, &fp, opts.bpf_expr, 0, -1);
+	if (err)
+		err_exit(pcap_geterr(pcap));
+
+	err = pcap_setfilter(pcap, &fp);
+	if (err)
+		err_exit(pcap_geterr(pcap));
 
 	printf("datalink: %d\n", pcap_datalink(pcap));
 	err = pcap_loop(pcap, CAPTURE_INF, pkt_handler, NULL);
