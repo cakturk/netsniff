@@ -15,10 +15,10 @@ int eth_print(const struct machdr *mh, struct strbuf *sb)
 	if (sb_room(sb) < (ETH_ADDRSTRLEN * 2) + 1)
 		return -ENOBUFS;
 
-	mac_str(sb_curr(sb), mh->dst);
+	mac_str(sb_curr(sb), mh->src);
 	sb->len += ETH_ADDRSTRLEN - 1;
 	sb_append_char(sb, '>');
-	mac_str(sb_curr(sb), mh->src);
+	mac_str(sb_curr(sb), mh->dst);
 	sb->len += ETH_ADDRSTRLEN - 1;
 
 	return 0;
