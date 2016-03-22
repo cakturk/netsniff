@@ -16,7 +16,11 @@
 } while (0)
 
 static void
-pkt_handler(u_char *, const struct pcap_pkthdr *, const u_char *);
+pkt_handler_en10mb(u_char *usr, const struct pcap_pkthdr *pkt,
+		   const u_char *d);
+static void
+pkt_handler_linux_sll(u_char *usr, const struct pcap_pkthdr *pkt,
+		      const u_char *d);
 const char *
 mac_str(char *__restrict buf, uint8_t *__restrict addr);
 
@@ -26,7 +30,7 @@ int main(int argc, char *argv[])
 	struct bpf_program fp;
 	char errbuff[PCAP_ERRBUF_SIZE];
 	pcap_t *pcap;
-	int err;
+	int err, linktype;
 
 	if (get_program_options(argc, argv, &opts))
 		err_exit("could not get program options\n");
@@ -49,8 +53,22 @@ int main(int argc, char *argv[])
 	if (err)
 		err_exit(pcap_geterr(pcap));
 
-	printf("datalink: %d\n", pcap_datalink(pcap));
-	err = pcap_loop(pcap, CAPTURE_INF, pkt_handler, NULL);
+	linktype = pcap_datalink(pcap);
+	printf("datalink: %s\n", pcap_datalink_val_to_name(linktype));
+
+	switch (linktype) {
+	case DLT_EN10MB:
+		err = pcap_loop(pcap, CAPTURE_INF,
+				pkt_handler_en10mb, NULL);
+		break;
+	case DLT_LINUX_SLL:
+		err = pcap_loop(pcap, CAPTURE_INF,
+				pkt_handler_linux_sll, NULL);
+		break;
+	default:
+		err_exit("Datalink type is not yet supported!\n");
+	}
+
 	switch (err) {
 		case 0:
 			printf("netsniff terminated successfully\n");
@@ -71,32 +89,31 @@ static struct strbuf sb = {
 	.buf = fmt_buf,
 };
 
-static void
-pkt_handler(u_char *usr, const struct pcap_pkthdr *pkt, const u_char *d)
+static void etherframe_print(u_char *usr, const struct pcap_pkthdr *pkt,
+			     const u_char *d, uint16_t ethtype)
 {
-	struct machdr *mac = mac_hdr(d);
 	struct iphdr *ip;
 	struct tcphdr *th;
 	struct udphdr *uh;
+	uint16_t ethtype_le;
 
-	sb_reset(&sb);
-	eth_print(mac, &sb);
+	ethtype_le = ntohs(ethtype);
 
-	switch (ntohs(mac->type)) {
+	switch (ethtype_le) {
 	case ETH_P_IP:
-		ip = ip_hdr(d + ETH_HLEN);
-		sb_append_str(&sb, "; IP: ");
+		ip = ip_hdr(d);
+		sb_append_str(&sb, "IP: ");
 		iphdr_print(ip, &sb);
 
 		switch (ip->protocol) {
 		case IPPROTO_TCP:
-			th = tcp_hdr(d + ETH_HLEN + ip_hdrlen(ip));
+			th = tcp_hdr(d + ip_hdrlen(ip));
 			sb_append_str(&sb, "; TCP: ");
 			tcp_print(th, &sb);
 			break;
 
 		case IPPROTO_UDP:
-			uh = udp_hdr(d + ETH_HLEN + ip_hdrlen(ip));
+			uh = udp_hdr(d + ip_hdrlen(ip));
 			sb_append_str(&sb, "; UDP: ");
 			udp_print(uh, &sb);
 			break;
@@ -108,10 +125,37 @@ pkt_handler(u_char *usr, const struct pcap_pkthdr *pkt, const u_char *d)
 
 		break;
 	default:
-		fprintf(stdout, "ether type: 0x%04x, %s\n",
-			ntohs(mac->type), ethertype_to_str(ntohs(mac->type)));
-		return;
+		/* FIXME: This code is open to buffer overrun errors */
+		sb_append_str(&sb, "ether type: ");
+		sb.len += sprintf(sb_curr(&sb), "0x%04x ", ethtype_le);
+		sb_append_str(&sb, ethertype_to_str(ethtype_le));
 	}
+}
+
+static void
+pkt_handler_en10mb(u_char *usr, const struct pcap_pkthdr *pkt,
+		   const u_char *d)
+{
+	struct machdr *mac = mac_hdr(d);
+
+	sb_reset(&sb);
+	eth_print(mac, &sb);
+	sb_append_str(&sb, "; ");
+	etherframe_print(usr, pkt, d + ETH_HLEN, mac->type);
+	sb_append_null(&sb);
+	fprintf(stdout, "pkt: %s\n", sb.buf);
+}
+
+static void
+pkt_handler_linux_sll(u_char *usr, const struct pcap_pkthdr *pkt,
+		      const u_char *d)
+{
+	struct dlt_linux_sll *ll = dlt_linux_sll_hdr(d);
+
+	BUILD_BUG_ON(sizeof(*ll) != 16);
+
+	sb_reset(&sb);
+	etherframe_print(usr, pkt, ll->payload, ll->proto_type);
 	sb_append_null(&sb);
 	fprintf(stdout, "pkt: %s\n", sb.buf);
 }

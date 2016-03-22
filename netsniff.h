@@ -69,6 +69,28 @@ static inline void sb_append_nullstr(struct strbuf *sb, const char *s)
 	sb_append_null(sb);
 }
 
+/**
+ * BUILD_BUG_ON - break compile if a condition is true.
+ * Copied from linux kernel source tree
+ */
+#define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
+
+/**
+ * I could simply 'memcpy' the 'proto_type' field but I added
+ * this structure definition in the hope that it will be useful
+ * for the readers to help understand.
+ */
+struct dlt_linux_sll {
+	uint16_t ptype;
+	uint16_t arphrd_type;
+	uint16_t ll_addr_len;
+	uint8_t  ll_addr[8];
+	uint16_t proto_type;
+	uint8_t  payload[];
+};
+
+#define dlt_linux_sll_hdr(ptr) ((struct dlt_linux_sll *)(ptr))
+
 #define ETH_ALEN 6        /* Octets in one ethernet addr   */
 #define ETH_HLEN 14       /* Total octets in header.       */
 #define ETH_ADDRSTRLEN 18 /* Total octets in header.       */
