@@ -70,13 +70,13 @@ int main(int argc, char *argv[])
 	}
 
 	switch (err) {
-		case 0:
-			printf("netsniff terminated successfully\n");
-			break;
-		case -1:
-		case -2:
-			printf("netsniff terminated with error: %d\n", err);
-			break;
+	case 0:
+		printf("netsniff terminated successfully\n");
+		break;
+	case -1:
+	case -2:
+		printf("netsniff terminated with error: %d\n", err);
+		break;
 	}
 
 	exit(EXIT_SUCCESS);
