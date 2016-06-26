@@ -120,7 +120,7 @@ static void etherframe_print(u_char *usr, const struct pcap_pkthdr *pkt,
 
 		default:
 			sb_append_char(&sb, ' ');
-			sb_append_nullstr(&sb, ipproto_str(ip->protocol));
+			sb_append_str(&sb, ipproto_str(ip->protocol));
 		}
 
 		break;
@@ -142,7 +142,6 @@ pkt_handler_en10mb(u_char *usr, const struct pcap_pkthdr *pkt,
 	eth_print(mac, &sb);
 	sb_append_str(&sb, "; ");
 	etherframe_print(usr, pkt, d + ETH_HLEN, mac->type);
-	sb_append_null(&sb);
 	fprintf(stdout, "pkt: %s\n", sb.buf);
 }
 
@@ -156,6 +155,5 @@ pkt_handler_linux_sll(u_char *usr, const struct pcap_pkthdr *pkt,
 
 	sb_reset(&sb);
 	etherframe_print(usr, pkt, ll->payload, ll->proto_type);
-	sb_append_null(&sb);
 	fprintf(stdout, "pkt: %s\n", sb.buf);
 }

@@ -51,22 +51,18 @@ static inline void sb_reset(struct strbuf *sb)
 }
 static inline void sb_append_char(struct strbuf *sb, char c)
 {
-	*(sb->buf + sb->len++) = c;
+	sb->buf[sb->len++] = c;
+	sb->buf[sb->len] = '\0';
 }
-static inline void sb_append_null(struct strbuf *sb)
+static inline void sb_append(struct strbuf *sb, const void *s, size_t len)
 {
-	sb_append_char(sb, '\0');
+	memcpy(sb->buf + sb->len, s, len);
+	sb->len += len;
+	sb->buf[sb->len] = '\0';
 }
 static inline void sb_append_str(struct strbuf *sb, const char *s)
 {
-	size_t len = strlen(s);
-	memcpy(sb->buf + sb->len, s, len);
-	sb->len += len;
-}
-static inline void sb_append_nullstr(struct strbuf *sb, const char *s)
-{
-	sb_append_str(sb, s);
-	sb_append_null(sb);
+	sb_append(sb, s, strlen(s));
 }
 
 /**

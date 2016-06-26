@@ -52,7 +52,6 @@ int iphdr_print(struct iphdr *iph, struct strbuf *sb)
 		if (sb_room(sb) < msglen)
 			return -ENOBUFS;;
 		sb_append_str(sb, msg);
-		sb_append_null(sb);
 		return 0;
 	}
 
